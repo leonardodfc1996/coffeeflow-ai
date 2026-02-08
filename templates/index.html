@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoffeeFlow AI - Live Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .title {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #ffd166, #06d6a0, #118ab2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(6, 214, 160, 0.2);
+            border-radius: 20px;
+            font-family: 'Roboto Mono', monospace;
+            border: 1px solid #06d6a0;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(6, 214, 160, 0.3);
+        }
+        
+        .card-title {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #06d6a0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .metric {
+            margin: 15px 0;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 2rem;
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #118ab2, #06d6a0);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+        
+        .chart-container {
+            height: 250px;
+            margin-top: 15px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th {
+            text-align: left;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            font-family: 'Roboto Mono', monospace;
+            border-bottom: 2px solid #06d6a0;
+        }
+        
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #118ab2, #073b4c);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">☕ CoffeeFlow AI</h1>
+            <p class="subtitle">Autonomous Coffee Harvesting Robot - Live Dashboard</p>
+            <div class="status-indicator">
+                <span id="statusText">● CONNECTING...</span>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- Robot Status Card -->
+            <div class="card">
+                <h2 class="card-title">🤖 ROBOT STATUS</h2>
+                <div class="metric">
+                    <div class="metric-label">Robot ID</div>
+                    <div class="metric-value" id="robotId">AGROBOT-3000-VE-SANARE</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Location</div>
+                    <div class="metric-value" id="location">Sanare Mountains, Venezuela</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Altitude</div>
+                    <div class="metric-value" id="altitude">1300 meters</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Status</div>
+                    <div class="metric-value" id="robotStatus">HARVESTING</div>
+                </div>
+            </div>
+            
+            <!-- Harvest Metrics Card -->
+            <div class="card">
+                <h2 class="card-title">⚖️ HARVEST METRICS</h2>
+                <div class="metric">
+                    <div class="metric-label">Coffee Collected</div>
+                    <div class="metric-value"><span id="harvestKg">0.00</span> kg</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="harvestProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-label" style="text-align: right">Max: 22.0 kg</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Battery Level</div>
+                    <div class="metric-value"><span id="battery">100.0</span>%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="batteryProgress" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Terrain Analysis Card -->
+            <div class="card">
+                <h2 class="card-title">🏔️ TERRAIN ANALYSIS</h2>
+                <div class="metric">
+                    <div class="metric-label">Slope Angle</div>
+                    <div class="metric-value"><span id="slope">0.0</span>°</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="slopeProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-label">Efficiency: <span id="efficiency">0</span>%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Risk Level</div>
+                    <div class="metric-value" id="riskLevel">LOW</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Coffee Quality</div>
+                    <div class="metric-value" id="coffeeQuality">Premium Arabica</div>
+                </div>
+            </div>
+            
+            <!-- Live Chart Card -->
+            <div class="card" style="grid-column: span 2;">
+                <h2 class="card-title">📈 LIVE TELEMETRY</h2>
+                <div class="chart-container">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Recent Data Card -->
+            <div class="card" style="grid-column: span 2;">
+                <h2 class="card-title">📊 RECENT TELEMETRY DATA</h2>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="fetchLatestData()">🔄 Refresh Data</button>
+                    <button class="btn btn-secondary" onclick="clearData()">🗑️ Clear Data</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Robot ID</th>
+                            <th>Harvest (kg)</th>
+                            <th>Battery</th>
+                            <th>Slope</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <tr><td colspan="6" style="text-align: center;">Waiting for data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>CoffeeFlow AI - Autonomous Coffee Harvesting System | LabLab AI Hackathon</p>
+            <p>Backend Status: <span id="backendStatus">Checking...</span> | Data Points: <span id="dataPoints">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        let chart;
+        let dataPoints = [];
+        const MAX_CHART_POINTS = 20;
+        
+        // Initialize Chart.js
+        function initChart() {
+            const ctx = document.getElementById('telemetryChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Harvest (kg)',
+                            data: [],
+                            borderColor: '#06d6a0',
+                            backgroundColor: 'rgba(6, 214, 160, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Battery (%)',
+                            data: [],
+                            borderColor: '#118ab2',
+                            backgroundColor: 'rgba(17, 138, 178, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Slope (°)',
+                            data: [],
+                            borderColor: '#ffd166',
+                            backgroundColor: 'rgba(255, 209, 102, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    family: 'Roboto Mono'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update dashboard with new data
+        function updateDashboard(data) {
+            // Update basic info
+            document.getElementById('robotId').textContent = data.robot_id || 'AGROBOT-3000-VE-SANARE';
+            document.getElementById('location').textContent = data.location || 'Sanare Mountains, Venezuela';
+            document.getElementById('altitude').textContent = '1300 meters';
+            document.getElementById('robotStatus').textContent = data.status || 'HARVESTING';
+            
+            // Update harvest metrics
+            const harvestKg = data.harvest_kg || 0;
+            document.getElementById('harvestKg').textContent = harvestKg.toFixed(2);
+            const harvestPercent = Math.min((harvestKg / 22) * 100, 100);
+            document.getElementById('harvestProgress').style.width = harvestPercent + '%';
+            
+            // Update battery
+            const battery = data.battery || 100;
+            document.getElementById('battery').textContent = battery.toFixed(1);
+            document.getElementById('batteryProgress').style.width = battery + '%';
+            
+            // Update terrain analysis
+            const slope = data.slope_degrees || 0;
+            document.getElementById('slope').textContent = slope.toFixed(1);
+            const slopePercent = Math.min((slope / 45) * 100, 100);
+            document.getElementById('slopeProgress').style.width = slopePercent + '%';
+            
+            // Calculate efficiency (inverse of slope, for demo)
+            const efficiency = Math.max(0, 100 - (slope * 2));
+            document.getElementById('efficiency').textContent = efficiency.toFixed(0);
+            
+            // Update risk level
+            let riskLevel = 'LOW';
+            let riskColor = '#06d6a0';
+            if (slope > 30) {
+                riskLevel = 'HIGH';
+                riskColor = '#ef476f';
+            } else if (slope > 15) {
+                riskLevel = 'MEDIUM';
+                riskColor = '#ffd166';
+            }
+            document.getElementById('riskLevel').textContent = riskLevel;
+            document.getElementById('riskLevel').style.color = riskColor;
+            
+            // Update coffee quality
+            document.getElementById('coffeeQuality').textContent = 
+                efficiency > 70 ? 'Premium Arabica' : efficiency > 50 ? 'Standard Arabica' : 'Lower Quality';
+            
+            // Add to chart
+            const timeLabel = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            dataPoints.push({
+                time: timeLabel,
+                harvest: harvestKg,
+                battery: battery,
+                slope: slope
+            });
+            
+            // Keep only last MAX_CHART_POINTS
+            if (dataPoints.length > MAX_CHART_POINTS) {
+                dataPoints.shift();
+            }
+            
+            // Update chart
+            chart.data.labels = dataPoints.map(d => d.time);
+            chart.data.datasets[0].data = dataPoints.map(d => d.harvest);
+            chart.data.datasets[1].data = dataPoints.map(d => d.battery);
+            chart.data.datasets[2].data = dataPoints.map(d => d.slope);
+            chart.update();
+            
+            // Update status
+            document.getElementById('statusText').innerHTML = '● LIVE - Receiving data';
+            document.getElementById('statusText').style.color = '#06d6a0';
+        }
+        
+        // Fetch latest telemetry data
+        async function fetchLatestData() {
+            try {
+                const baseUrl = window.location.origin;
+                
+                // Check backend health
+                const healthResponse = await fetch(`${baseUrl}/api/health`);
+                const healthData = await healthResponse.json();
+                
+                document.getElementById('backendStatus').textContent = '🟢 Online';
+                document.getElementById('dataPoints').textContent = healthData.data_points || 0;
+                
+                // Get latest telemetry
+                const response = await fetch(`${baseUrl}/api/telemetry/latest`);
+                if (response.status === 404) {
+                    document.getElementById('dataTableBody').innerHTML = 
+                        '<tr><td colspan="6" style="text-align: center;">No data yet. Start sending data from robot.</td></tr>';
+                    return;
+                }
+                
+                const data = await response.json();
+                updateDashboard(data);
+                
+                // Also get all data for table
+                const allResponse = await fetch(`${baseUrl}/api/telemetry/all`);
+                const allData = await allResponse.json();
+                
+                // Update table
+                const tableBody = document.getElementById('dataTableBody');
+                tableBody.innerHTML = '';
+                
+                // Show last 5 entries
+                const recentData = allData.slice(-5).reverse();
+                recentData.forEach(item => {
+                    const time = new Date(item.timestamp).toLocaleTimeString();
+                    const row = `
+                        <tr>
+                            <td>${time}</td>
+                            <td>${item.robot_id}</td>
+                            <td>${item.harvest_kg.toFixed(2)}</td>
+                            <td>${item.battery.toFixed(1)}%</td>
+                            <td>${item.slope_degrees.toFixed(1)}°</td>
+                            <td>${item.location}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('backendStatus').textContent = '🔴 Offline';
+                document.getElementById('statusText').innerHTML = '● DISCONNECTED';
+                document.getElementById('statusText').style.color = '#ef476f';
+            }
+        }
+        
+        // Clear all data
+        async function clearData() {
+            if (confirm('Are you sure you want to clear all telemetry data?')) {
+                try {
+                    const baseUrl = window.location.origin;
+                    await fetch(`${baseUrl}/api/telemetry/clear`, { method: 'POST' });
+                    alert('All data cleared successfully!');
+                    fetchLatestData();
+                } catch (error) {
+                    alert('Error clearing data: ' + error.message);
+                }
+            }
+        }
+        
+        // Auto-refresh every 3 seconds
+        function startAutoRefresh() {
+            fetchLatestData();
+            setInterval(fetchLatestData, 3000);
+        }
+        
+        // Initialize everything when page loads
+        window.onload = function() {
+            initChart();
+            startAutoRefresh();
+        };
+    </script>
+</body>
+</html>
