@@ -22,25 +22,24 @@
 - 🌐 **Cloud Integration** (Render + The Construct)
 
 ## 🏗️ Architecture
-THE CONSTRUCT SIMULATION
-• ROS-based robot simulation environment
-• Coffee harvesting simulation
-• Mountain terrain navigation
-• Real-time telemetry generation
-↓ (HTTP POST /api/telemetry)
 
-RENDER BACKEND (Flask)
-• REST API for telemetry data
-• Data storage and processing
-• Web dashboard serving
-↓ (WebSocket/HTTP)
+### THE CONSTRUCT SIMULATION
+- ROS-based robot simulation environment
+- Coffee harvesting simulation
+- Mountain terrain navigation
+- Real-time telemetry generation
+  - ↓ (HTTP POST `/api/telemetry`)
 
-WEB DASHBOARD
-• Real-time data visualization
-• Charts and metrics
-• Robot control interface
+### RENDER BACKEND (Flask)
+- REST API for telemetry data
+- Data storage and processing
+- Web dashboard serving
+  - ↓ (WebSocket/HTTP)
 
-text
+### WEB DASHBOARD
+- Real-time data visualization
+- Charts and metrics
+- Robot control interface
 
 ## 🛠️ Installation & Setup
 
@@ -65,6 +64,7 @@ RENDER_URL = "https://your-render-url.onrender.com"
 
 # Run the simulation
 python3 coffeeflow_ai.py
+
 📡 API Endpoints
 Method	Endpoint	Description
 GET	/	Web dashboard
@@ -76,10 +76,11 @@ POST	/api/telemetry/clear	Clear all data (dev)
 GET	/api/stats	Get operation statistics
 🎮 Usage
 1. Start the Backend
+
 The backend automatically starts when you deploy to Render.
 
 2. Run Robot Simulation (The Construct)
-python
+
 # Sample telemetry data format
 telemetry_data = {
     "robot_id": "AGROBOT-3000-VE-SANARE",
@@ -94,8 +95,10 @@ telemetry_data = {
 # Send to backend
 import requests
 response = requests.post(f"{RENDER_URL}/api/telemetry", json=telemetry_data)
+
 3. Monitor Dashboard
-Open your Render URL in browser to see:
+
+Open your Render URL in a browser to see:
 
 Real-time harvest metrics
 
@@ -108,6 +111,7 @@ Risk assessment
 Live charts
 
 📊 Data Flow
+
 Robot → Collects coffee in mountain terrain
 
 Sensors → Measure slope, battery, harvest weight
@@ -119,6 +123,7 @@ Render Backend → Receives and stores data
 Dashboard → Visualizes in real-time
 
 🎯 Business Impact
+
 40% cost reduction vs manual harvesting
 
 45% efficiency improvement in mountain terrain
@@ -130,12 +135,15 @@ Dashboard → Visualizes in real-time
 18-month ROI for average coffee farm
 
 🏆 Hackathon Submission
+
 This project was created for the LabLab AI Autonomous Robotics Hackathon.
 
 Team
+
 Leonardo - Full Stack & Robotics Integration
 
 Technologies Used
+
 The Construct - Robot Simulation
 
 Render - Cloud Backend
@@ -147,9 +155,11 @@ Chart.js - Data Visualization
 ROS - Robot Operating System
 
 📝 License
+
 MIT License - See LICENSE file for details.
 
 🤝 Contributing
+
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
 Made for Venezuelan Coffee Farmers | 🏔️ Optimized for 1300-1800msnm Terrain | ☕ Preserving Coffee Heritage
