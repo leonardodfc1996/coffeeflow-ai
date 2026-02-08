@@ -22,29 +22,23 @@
 - 🌐 **Cloud Integration** (Render + The Construct)
 
 ## 🏗️ Architecture
-┌─────────────────────────────────────────────────┐
-│ THE CONSTRUCT SIMULATION │
-│ (ROS-based robot simulation environment) │
-│ • Coffee harvesting simulation │
-│ • Mountain terrain navigation │
-│ • Real-time telemetry generation │
-└───────────────┬─────────────────────────────────┘
-│ (HTTP POST /api/telemetry)
-▼
-┌─────────────────────────────────────────────────┐
-│ RENDER BACKEND (Flask) │
-│ • REST API for telemetry data │
-│ • Data storage and processing │
-│ • Web dashboard serving │
-└───────────────┬─────────────────────────────────┘
-│ (WebSocket/HTTP)
-▼
-┌─────────────────────────────────────────────────┐
-│ REACT DASHBOARD │
-│ • Real-time data visualization │
-│ • Charts and metrics │
-│ • Robot control interface │
-└─────────────────────────────────────────────────┘
+THE CONSTRUCT SIMULATION
+• ROS-based robot simulation environment
+• Coffee harvesting simulation
+• Mountain terrain navigation
+• Real-time telemetry generation
+↓ (HTTP POST /api/telemetry)
+
+RENDER BACKEND (Flask)
+• REST API for telemetry data
+• Data storage and processing
+• Web dashboard serving
+↓ (WebSocket/HTTP)
+
+WEB DASHBOARD
+• Real-time data visualization
+• Charts and metrics
+• Robot control interface
 
 text
 
